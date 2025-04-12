@@ -1,0 +1,72 @@
+const admin = require('firebase-admin');
+const fs = require('fs');
+const path = require('path');
+
+/**
+ * Initialize Firebase Admin using service account file directly
+ */
+const initializeFirebase = () => {
+  if (admin.apps.length) {
+    console.log('Firebase already initialized, returning existing instance');
+    return admin; // Already initialized
+  }
+
+  try {
+    console.log('Initializing Firebase with service account file...');
+    
+    // Use the service account file directly
+    const serviceAccountPath = path.join(process.cwd(), 'go-agent-2ce60-firebase-adminsdk-fbsvc-5bfefe056d.json');
+    console.log(`Looking for service account at: ${serviceAccountPath}`);
+    
+    if (!fs.existsSync(serviceAccountPath)) {
+      throw new Error(`Service account file not found at: ${serviceAccountPath}`);
+    }
+    
+    // Load the service account file
+    const serviceAccount = require(serviceAccountPath);
+    
+    // Initialize Firebase with the service account
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
+    });
+    
+    console.log('Firebase successfully initialized with service account file');
+    return admin;
+  } catch (error) {
+    console.error('Firebase initialization error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Reinitialize Firebase Admin if needed
+ */
+const reinitializeFirebase = () => {
+  try {
+    console.log('Reinitializing Firebase...');
+    
+    // Delete all existing apps
+    admin.apps.forEach(app => {
+      console.log(`Deleting Firebase app: ${app.name}`);
+      app.delete();
+    });
+    
+    // Reinitialize
+    const newInstance = initializeFirebase();
+    console.log('Firebase reinitialization complete');
+    return newInstance;
+  } catch (error) {
+    console.error('Firebase reinitialization error:', error);
+    throw error;
+  }
+};
+
+// Initialize and export Firebase admin
+const firebase = initializeFirebase();
+
+module.exports = {
+  firebase,
+  admin,
+  reinitializeFirebase
+}; 

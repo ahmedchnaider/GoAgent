@@ -1,0 +1,25 @@
+// Recommended Firestore security rules for GoAgents application
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow users to read and write only their own data
+    match /Users/{userId} {
+      // Allow authenticated users to read and write their own documents
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Also allow unauthenticated create for signup process
+      allow create: if request.resource.data.email != null;
+    }
+    
+    // Rules for other collections can be added as needed
+  }
+}
+
+// IMPORTANT: These rules allow the signup process to work with the client SDK.
+// For production, you may want to adjust them to be more restrictive.
+// Upload these rules in the Firebase Console:
+// 1. Go to https://console.firebase.google.com/
+// 2. Select your project
+// 3. Go to Firestore Database > Rules
+// 4. Paste these rules
+// 5. Click Publish 
