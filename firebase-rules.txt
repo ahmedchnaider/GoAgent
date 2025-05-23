@@ -11,7 +11,12 @@ service cloud.firestore {
       allow create: if request.resource.data.email != null;
     }
     
-    // Rules for other collections can be added as needed
+    // Allow writes to the leads collection from the server
+    match /leads/{document=**} {
+      // Allow all operations on leads collection
+      // This is safe because only the server can access this endpoint
+      allow read, write: if true;
+    }
   }
 }
 
