@@ -24,7 +24,7 @@ const PORT = process.env.PORT || 5000;
 // Updated CORS configuration to handle multiple origins
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://go-agents.app',
+  'https://goagents.app',
   process.env.FRONTEND_URL
 ].filter(Boolean); // Remove any undefined/null values
 
